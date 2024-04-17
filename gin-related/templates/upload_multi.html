@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ajax</title>
+</head>
+<body>
+<div class="upload-wrapper">
+    <input id="ajax" type="file" multiple>
+    <br>
+    <br>
+    <button id="btn-submit">提交</button>
+</div>
+<script>
+    const btn = document.getElementById('btn-submit')
+    btn.addEventListener('click', handleUpload)
+
+    function handleUpload() {
+        const inputFile = document.getElementById('ajax'),
+            fileList = inputFile.files
+        if (!fileList.length) {
+            return alert('请选择文件')
+        }
+        /* 使用FormData对象，将上传对象存入FormData对象内 */
+        const formData = new FormData()
+        formData.append("name", "single file")
+        for (let i = 0; i < fileList.length; i++) {
+            formData.append('file', fileList[i])
+        }
+        const xhr = new XMLHttpRequest()
+        xhr.open('POST', 'http://localhost:9100/multi_file', true)
+        xhr.onreadystatechange = function() {
+            if(xhr.readyState === 4 && xhr.status === 200) {
+                const obj = JSON.parse(xhr.responseText);
+                console.log(obj);
+            }
+        }
+        xhr.send(formData)
+    }
+</script>
+</body>
+</html>

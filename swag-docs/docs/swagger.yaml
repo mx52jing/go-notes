@@ -1,0 +1,102 @@
+definitions:
+  student.User:
+    properties:
+      age:
+        description: 年龄
+        type: integer
+      id:
+        description: 用户ID
+        type: integer
+      name:
+        description: 姓名
+        type: string
+    type: object
+  user.User:
+    properties:
+      age:
+        type: integer
+      birthday:
+        type: string
+      gender:
+        enum:
+        - male
+        - female
+        type: string
+      user_name:
+        type: string
+    required:
+    - age
+    - gender
+    - user_name
+    type: object
+info:
+  contact: {}
+paths:
+  /get/{id}:
+    get:
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/student.User'
+        "400":
+          description: 参数错误
+          schema:
+            type: string
+        "500":
+          description: 内部错误
+          schema:
+            type: string
+  /update_user:
+    post:
+      parameters:
+      - description: 用户信息
+        in: body
+        name: uer
+        required: true
+        schema:
+          $ref: '#/definitions/student.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            type: string
+        "400":
+          description: 参数错误
+          schema:
+            type: string
+        "500":
+          description: 内部错误
+          schema:
+            type: string
+  /user/add:
+    post:
+      parameters:
+      - description: 用户信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 添加用户成功
+          schema:
+            type: string
+        "500":
+          description: 添加用户失败
+          schema:
+            type: string
+swagger: "2.0"

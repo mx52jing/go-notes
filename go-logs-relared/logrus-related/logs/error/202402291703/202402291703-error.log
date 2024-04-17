@@ -1,0 +1,6 @@
+time="2024-02-29 17:03:54" level=error msg="打印一个Error" func="main.main.func2()" file="logrus-related/3-split.go:252"
+time="2024-02-29 17:03:55" level=error msg="打印一个Error" func="main.main.func2()" file="logrus-related/3-split.go:252"
+time="2024-02-29 17:03:56" level=error msg="打印一个Error" func="main.main.func2()" file="logrus-related/3-split.go:252"
+time="2024-02-29 17:03:57" level=error msg="打印一个Error" func="main.main.func2()" file="logrus-related/3-split.go:252"
+time="2024-02-29 17:03:58" level=error msg="打印一个Error" func="main.main.func2()" file="logrus-related/3-split.go:252"
+time="2024-02-29 17:03:59" level=error msg="打印一个Error" func="main.main.func2()" file="logrus-related/3-split.go:252"

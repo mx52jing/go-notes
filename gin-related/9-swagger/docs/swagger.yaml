@@ -1,0 +1,46 @@
+definitions:
+  api.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      msg:
+        type: string
+    type: object
+  api.User:
+    properties:
+      age:
+        type: integer
+      gender:
+        type: string
+      user_name:
+        type: string
+    required:
+    - age
+    - user_name
+    type: object
+info:
+  contact: {}
+paths:
+  /user/add:
+    post:
+      parameters:
+      - description: 用户信息数据
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/api.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 接口响应成功
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: 接口响应失败
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: 添加新用户
+swagger: "2.0"

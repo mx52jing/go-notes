@@ -1,0 +1,25 @@
+{
+  "user1": {
+    "username": "zs",
+    "password": "123456",
+    "attributes": {
+      "height": 180,
+      "bodyHeight": 130
+    },
+    "like": [
+      "run",
+      "fitness"
+    ]
+  },
+  "user2": {
+    "username": "ls",
+    "password": "258369",
+    "attributes": {
+      "height": 178,
+      "bodyHeight": 128
+    },
+    "like": [
+      "pingpang"
+    ]
+  }
+}
