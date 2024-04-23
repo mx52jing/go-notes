@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>聊天室</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="app">
+        <div class="min-h-screen bg-gray-100 flex justify-center items-center">
+            <div
+                class="hidden sign-in-block w-96 bg-white p-8 rounded-lg shadow-lg transition ease-in-out delay-150 transition duration-700 ease-in-out"
+            >
+                <h1 class="text-center text-2xl font-medium mb-6">Login</h1>
+                <form class="form-block">
+                    <div class="mb-6">
+                        <label class="block text-gray-700 font-bold mb-2" for="username">Username</label>
+                        <input
+                            name="username"
+                            class="w-full border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            id="username"
+                            type="text"
+                            placeholder="Please input username"
+                            maxlength="10"
+                            required
+                        >
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <input id="btn-sign-in" class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit" value="Sign In"/>
+                    </div>
+                </form>
+            </div>
+            <div class="chat-block hidden bg-white rounded-lg shadow-lg w-1/2 mx-auto">
+                <!-- 消息列表 -->
+                <div class="message-list-box overflow-auto h-[36rem] p-4 space-y-4">
+                    <!-- 每条消息 -->
+                    <!-- 更多消息... -->
+                </div>
+                <!-- 消息输入区域 -->
+                <div class="border-t p-4 flex items-center">
+                    <textarea class="chat-input flex-1 p-2 rounded-lg border-2 border-gray-300 focus:border-blue-500 focus:outline-none resize-none" rows="6" placeholder="Type a message..."></textarea>
+                    <button class="chat-btn-submit shink-0 ml-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none">
+                        发送
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        window.onload = function() {
+            localStorage.clear()
+            let socketInstance = null
+            const space = ' '
+            const storageNames = {
+                userInfo: "USERINFO"
+            }
+            const $ = selector => document.querySelector(selector)
+            const signBlock = $('.sign-in-block')
+            const signInFormEl = $(".form-block")
+            const charBlockEl = $(".chat-block")
+            const chatInputEl = $(".chat-input")
+            const chatSubtmiBtn = $(".chat-btn-submit")
+            const msgListBox = $('.message-list-box ')
+            const userInfo = JSON.parse(localStorage.getItem(storageNames.userInfo))
+            if(!!userInfo?.UserId) {
+                signBlock.classList.add("hidden")
+                charBlockEl.classList.remove("hidden")
+            }else {
+                signBlock.classList.remove("hidden")
+                charBlockEl.classList.add("hidden")
+            }
+            // 表单提交
+            const handleSignIn = (event) => {
+                event.preventDefault()
+                // construct a FormData object, which fires the formdata event
+                const formData = new FormData(signInFormEl);
+            }
+            // 获取表单数据事件
+            const handleFormData = (event) => {
+                const formData = event.formData;
+                const userName = formData.get("username");
+                signBlock.classList.add("hidden")
+                charBlockEl.classList.remove("hidden")
+                handleWsConnect(userName)
+            }
+            // 处理websocket连接
+            const handleWsConnect = (userName) => {
+                if(!window['WebSocket']) return
+                socketInstance = new WebSocket("ws://172.16.40.85:8900/ws")
+                // 监听websocket连接成功
+                socketInstance.addEventListener("open", () => {
+                    socketInstance.send(userName)
+                });
+                // Listen for messages
+                socketInstance.addEventListener("message", (event) => {
+                    const data = event.data
+                    const userInfo = getUserInfo() ?? {}
+                    if(!userInfo.UserId) {
+                        setUserInfo(data ?? {})
+                        return
+                    }
+                    handleMessage(data, userInfo)
+                });
+                socketInstance.addEventListener("close", () => {
+                    console.log("close")
+                    localStorage.removeItem(storageNames.userInfo)
+                })
+                // Listen for possible errors
+                socketInstance.addEventListener("error", (event) => {
+                    console.log("WebSocket error: ", event);
+                });
+            }
+            const handleSendChatMessage = () => {
+                let chatMsg = chatInputEl.value
+                if(!chatMsg) return
+                chatMsg = chatMsg.replace(/\r?\n/g, space)
+                socketInstance.send(chatMsg)
+                chatInputEl.value = ''
+            }
+            const getUserInfo = () => {
+                try {
+                    return JSON.parse(localStorage.getItem(storageNames.userInfo))
+                }catch (e) {
+                    return {}
+                }
+            }
+            const setUserInfo = (userInfo) => {
+                if(typeof userInfo !== 'string') {
+                    userInfo = JSON.stringify(userInfo)
+                }
+                localStorage.setItem(storageNames.userInfo, userInfo)
+            }
+            const handleMessage = (data, userInfo) => {
+                data = JSON.parse(data)
+                if(data?.Message === '') {
+                    const tipsHTML = `
+                        <div class="flex justify-center items-center text-sm text-gray-300">${data?.UserName}加入了群聊</div>
+                    `
+                    msgListBox.insertAdjacentHTML('beforeend', tipsHTML)
+                    return
+                }
+                const isCurUser = data?.UserId === userInfo?.UserId
+                const messageHTML = `
+                    <div class="flex items-end space-x-2 ${isCurUser ? 'mr-2 flex-row-reverse' : ''}">
+                        <div class="flex items-center justify-center rounded-full text-sm bg-blue-500 w-12 h-12">${data?.UserName.slice(0, 2)}</div>
+                        <div class="bg-blue-100 rounded-lg p-2">${data?.Message}</div>
+                    </div>
+                `
+                msgListBox.insertAdjacentHTML('beforeend', messageHTML)
+            }
+            signInFormEl.addEventListener("submit", handleSignIn)
+            signInFormEl.addEventListener("formdata", handleFormData);
+            chatSubtmiBtn.addEventListener("click", handleSendChatMessage)
+        }
+    </script>
+</body>
+</html>

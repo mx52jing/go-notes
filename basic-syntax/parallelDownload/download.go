@@ -38,6 +38,7 @@ func downloadFile(remoteUrl, filename string) {
 	// 	writer.WriteByte(byte)
 	// }
 	// writer.Flush()
+	// 使用io.Copy效率更高
 	_, copyErr := io.Copy(writeFile, resp.Body)
 	if copyErr != nil {
 		fmt.Println("Copy File error", copyErr)
@@ -55,7 +56,7 @@ func generateFilePath(filename string) (path string, err error) {
 		os.MkdirAll(dirPath, os.ModePerm)
 	}
 	path = filepath.Join(dirPath, filename)
-	return 
+	return
 }
 
 func main() {
@@ -72,8 +73,8 @@ func main() {
 	wg.Add(len(fileUrls))
 	for idx, val := range fileUrls {
 		ext := filepath.Ext(val)
-		fileName := fmt.Sprintf("%d%s", idx + 1, ext)
-		go func (url, fileName string)  {
+		fileName := fmt.Sprintf("%d%s", idx+1, ext)
+		go func(url, fileName string) {
 			defer wg.Done()
 			downloadFile(url, fileName)
 		}(val, fileName)
