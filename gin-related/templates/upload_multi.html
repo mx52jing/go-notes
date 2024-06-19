@@ -23,7 +23,7 @@
         }
         /* 使用FormData对象，将上传对象存入FormData对象内 */
         const formData = new FormData()
-        formData.append("name", "single file")
+        formData.append("name", "multiple file")
         for (let i = 0; i < fileList.length; i++) {
             formData.append('file', fileList[i])
         }

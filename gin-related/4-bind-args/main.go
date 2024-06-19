@@ -135,6 +135,7 @@ func main() {
 	router.GET("/query_bind", queryBindHandler)
 	router.GET("/uri_bind/:user_name/:age/:sex", uriBindHandler)
 	router.POST("/bind", bindHandler)
+	router.GET("/bind", bindHandler)
 	router.GET("/s", studentHandler)
 	router.Run(":9100")
 }
