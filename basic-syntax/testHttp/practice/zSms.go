@@ -13,13 +13,13 @@ const requestUrl = "https://xxxxxxxxxx?mobileType=-1&mobileArea=-1&isLength=1&st
 
 // 接口请求会来的数据结构
 type ResponseData struct {
-	Code int    `json:"code"`
-	Msg  string `json:"msg"`
-	Data ResData
+	Code int     `json:"code"`
+	Msg  string  `json:"msg"`
+	Data ResData `json:"data"`
 }
 
 type ResData struct {
-	Records []Record
+	Records []Record `json:"records"`
 }
 
 type Record struct {
