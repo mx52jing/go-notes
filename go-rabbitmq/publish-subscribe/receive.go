@@ -34,7 +34,13 @@ func startUpAndReceive() {
 	shared.FailOnError(err, "declare queue error")
 
 	// bind exchange and queue
-	err = ch.QueueBind(queue.Name, "", "logsExchange", false, nil)
+	err = ch.QueueBind(
+		queue.Name,     // queue
+		"",             // routing key
+		"logsExchange", // exchange
+		false,          // no-wait
+		nil,            // args
+	)
 	shared.FailOnError(err, "bind exchange and queue error")
 
 	// consume message
