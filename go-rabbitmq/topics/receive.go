@@ -12,15 +12,16 @@ func startUpAndReceive() {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672")
 	shared.FailOnError(err, "create connection error")
 	defer conn.Close()
+
 	// create channel
 	ch, err := conn.Channel()
 	shared.FailOnError(err, "create channel error")
 	defer ch.Close()
-
+	exchangeName := "topicLogs"
 	// declare exchange
 	err = ch.ExchangeDeclare(
-		"directLogs",
-		"direct",
+		exchangeName,
+		"topic",
 		true,
 		false,
 		false,
@@ -29,7 +30,7 @@ func startUpAndReceive() {
 	)
 	shared.FailOnError(err, "declare exchange error")
 
-	// queue declare
+	// declare queue
 	queue, err := ch.QueueDeclare(
 		"",
 		false,
@@ -39,23 +40,25 @@ func startUpAndReceive() {
 		nil,
 	)
 	shared.FailOnError(err, "declare queue error")
+
 	if len(os.Args) < 2 {
-		fmt.Printf("Usage: %s [binding_key] [binding_key]...", os.Args[0])
+		fmt.Printf("Usage: %s [binding_key]...", os.Args[0])
 		os.Exit(1)
 	}
-	// 绑定多个类型的log
+	// bind queue and exchange
 	for _, routingKey := range os.Args[1:] {
-		fmt.Printf("Binding queue [%s] to exchange [%s] with routing key [%s]\n", queue.Name, "directLogs", routingKey)
+		fmt.Printf("Binding queue [%s] to exchange [%s] with routing key [%s]\n", queue.Name, "topicLogs", routingKey)
 		err = ch.QueueBind(
 			queue.Name,
 			routingKey,
-			"directLogs",
+			"topicLogs",
 			false,
 			nil,
 		)
-		shared.FailOnError(err, "QueueBind error")
+		shared.FailOnError(err, "bind queue error")
 	}
 
+	// consume message
 	messages, err := ch.Consume(
 		queue.Name,
 		"",
@@ -65,15 +68,15 @@ func startUpAndReceive() {
 		false,
 		nil,
 	)
-	shared.FailOnError(err, "consume error")
-	lockCh := make(chan struct{})
+	shared.FailOnError(err, "consume message error")
+
+	lockChan := make(chan struct{})
 	go func() {
-		for msg := range messages {
-			fmt.Printf("接收到的消息为：%s\n", msg.Body)
+		for delivery := range messages {
+			fmt.Printf("Receive message %s\n", delivery.Body)
 		}
 	}()
-	fmt.Println("[*] Waiting for messages. To exit press CTRL+C")
-	<-lockCh
+	<-lockChan
 }
 
 func main() {
